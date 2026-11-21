@@ -253,8 +253,52 @@ def trace_turn(runtime, source, inputs, expected_reply, selected_module, seed=42
         key=lambda x: -x[2])[:MAX_EDGES]
     graph_edges = [{"source":a,"target":b,"calls":c,"type":"observed"}
                    for a,b,c in chosen_edges]
+
+    # The default presentation lens is the observed FILE network. It is much
+    # easier to see than a mass of thousands of individual function circles.
+    # File aggregation uses only observed function-to-function calls.
+    file_calls = Counter()
+    file_edges = Counter()
+    for node_id, count in counts.items():
+        file_calls[nodes[node_id]["file"]] += count
+    for (left,right),count in edges.items():
+        src_file=nodes[left]["file"]
+        dst_file=nodes[right]["file"]
+        if src_file != dst_file:
+            file_edges[(src_file,dst_file)] += count
+    file_degree=Counter()
+    for (a,b),count in file_edges.items():
+        file_degree[a] += count
+        file_degree[b] += count
+    important_paths={"bot/runtime.py",arbiter_file,module_file}
+    important_paths.update(important_files)
+    file_rank=sorted(file_calls, key=lambda path:(
+        path not in important_paths,-file_degree[path],-file_calls[path],path))
+    selected_files=set(file_rank[:75])
+    file_nodes=[{
+        "id":"file:"+path,
+        "file":path,"name":Path(path).name,
+        "group":group_for(path),
+        "kind":"file",
+        "line":1,
+        "calls":file_calls[path]
+    } for path in file_rank if path in selected_files]
+    file_edge_items=sorted(
+        ((a,b,count) for (a,b),count in file_edges.items()
+         if a in selected_files and b in selected_files),
+        key=lambda item:-item[2])[:240]
+    observed_file_edges=[{
+        "source":"file:"+a,"target":"file:"+b,"calls":count,"type":"observed"
+    } for a,b,count in file_edge_items]
     # Preserve chronology even when a particular node was omitted from graph.
     return {
+        "file_graph": {
+            "nodes":file_nodes,"edges":observed_file_edges,
+            "observed_node_count":len(file_calls),
+            "observed_edge_count":len(file_edges),
+            "omitted_nodes":max(0,len(file_calls)-len(file_nodes)),
+            "omitted_edges":max(0,len(file_edges)-len(observed_file_edges))
+        },
         "graph": {"nodes":clipped_nodes,"edges":graph_edges,
                   "observed_node_count":len(nodes),"observed_edge_count":len(edges),
                   "omitted_nodes":max(0,len(nodes)-len(clipped_nodes)),
