@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Mac/Windows one-click entrypoint; no venv and no pip install."""
 import json
+import os
 import sys
 import threading
 import traceback
@@ -18,7 +19,7 @@ def main():
     try:
         source=ensure_upstream()
         url,server=serve(source)
-        if "--self-check" in sys.argv:
+        if "--self-check" in sys.argv or os.getenv("PYBOT_NETWORK_SELF_CHECK")=="1":
             runner=threading.Thread(target=server.serve_forever,daemon=True)
             runner.start()
             try:
