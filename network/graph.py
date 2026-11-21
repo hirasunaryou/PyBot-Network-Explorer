@@ -236,7 +236,8 @@ def trace_turn(runtime, source, inputs, expected_reply, selected_module, seed=42
     # official runtime and any code co-located with an exact answer literal.
     required = {e["node"] for e in frames if e["kind"] != "call"}
     required.update(node_id for node_id, node in nodes.items()
-                    if node["file"] in important_files or
+                    if (node["file"] in important_files
+                        and node["name"] in ("_averages", "solve", "find")) or
                     (node["file"] == module_file and node["name"] == "respond") or
                     (node["file"] == "bot/runtime.py" and node["name"] == "turn"))
     high_degree = Counter()
