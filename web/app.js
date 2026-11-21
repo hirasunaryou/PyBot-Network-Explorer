@@ -389,7 +389,7 @@
       [["分類",group],["ファイル",number(node.files)],["コード行数",number(node.lines)],
        ["関数",number(node.functions)]]:
       [["分類",group],["ファイル",node.file||"—"],
-       ["行",node.line||"—"],[node.calls!==undefined?"実行回数":"行数",number(node.calls??node.lines||0)]])){
+       ["行",node.line||"—"],[node.calls!==undefined?"実行回数":"行数",number(node.calls ?? node.lines ?? 0)]])){
       const row=document.createElement("div");row.className="fact";
       const left=document.createElement("span");left.textContent=label;
       const right=document.createElement("b");right.textContent=value;
