@@ -18,7 +18,7 @@
   const state={
     session:"graph_"+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2),
     turns:[],turnIndex:-1,trace:null,system:null,
-    view:"system",density:45,activeFrame:0,playing:null,speed:1,
+    view:"system",traceLevel:"files",density:45,activeFrame:0,playing:null,speed:1,
     selected:null,nodes:[],edges:[],nodeCache:new Map(),
     zoom:1,offsetX:0,offsetY:0,drag:null,busy:false,requestId:0,
     font:1,theme:"dark",expanded:false
@@ -74,7 +74,10 @@
   function selectedViewData(){
     if(state.view==="system")return state.system&&state.system.groups;
     if(state.view==="files")return state.system&&state.system.files;
-    return state.trace&&state.trace.graph;
+    if(!state.trace)return null;
+    const graph=state.traceLevel==="files"?state.trace.file_graph:state.trace.graph;
+    const groups=(state.system&&state.system.groups.nodes)||[];
+    return {nodes:groups.concat(graph.nodes||[]),edges:graph.edges||[]};
   }
   function pickNodes(data){
     if(!data)return [];
@@ -140,7 +143,8 @@
     $("graphEmpty").classList.toggle("hidden",nodes.length!==0);
     const coords=computeCoordinates(nodes);
     const frame=state.trace&&state.trace.frames[state.activeFrame];
-    const activeNode=state.view==="trace"&&frame&&frame.node||null;
+    const activeNode=state.view==="trace"&&frame&&(
+      state.traceLevel==="files"?"file:"+frame.file:frame.node)||null;
     const relevantEdges=(data.edges||[]).filter(e=>known.has(e.source)&&known.has(e.target));
     const related=new Set();
     for(const e of relevantEdges){
@@ -216,9 +220,11 @@
       button.setAttribute("aria-selected",String(active));
     }
     $("graphSource").innerHTML=mode==="trace"?
-      '<span class="evidence-key dynamic"></span> 動的グラフ / 別メモリで再実行したPyBot':
+      '<span class="evidence-key dynamic"></span> 動的グラフ / 再実行で観測した'+
+      (state.traceLevel==="files"?"ファイル間":"関数間")+'の呼び出し':
       '<span class="evidence-key static"></span> 静的グラフ / 元コードの構造・import関係';
     $("evidenceBadge").textContent=mode==="trace"?"REPLAY":"STATIC";
+    $("traceLevelWrap").classList.toggle("hidden",mode!=="trace");
     $("playbackTitle").textContent=mode==="trace"?"OBSERVED EXECUTION PATH":"STATIC SYSTEM MAP";
     $("playbackSubtitle").textContent=mode==="trace"?
       "再生位置の関数が光ります。矢印で前後へ。":"構造の可能性を示す図。実行された関数ではありません。";
@@ -517,6 +523,13 @@
       document.querySelectorAll("[data-example]").forEach(x=>x.classList.toggle("active",x===b));
     });
     document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>view(b.dataset.mode));
+    $("traceLevel").onchange=event=>{
+      state.traceLevel=event.target.value;
+      if(state.view==="trace"){
+        cameraReset();
+        renderGraph();
+      }
+    };
     $("density").oninput=value=>{
       state.density=Number(value.target.value);
       text("densityLabel",state.density);renderGraph();
