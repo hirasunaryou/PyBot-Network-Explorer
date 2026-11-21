@@ -29,6 +29,12 @@ Hugging Faceの [PyBot](https://github.com/huggingface/pybot) をそのまま実
 </td>
 </tr></table>
 
+<details>
+<summary><strong>さらに細かい「関数単位」の実行ネットワークを見る</strong></summary>
+<p><a href="docs/images/functions.png"><img src="docs/images/functions.png" alt="PyBotが実際に呼び出した関数を粒度の細かいネットワークとして表示" width="100%"></a></p>
+<p>動的実行グラフの「粒度」で<strong>ファイル単位 ↔ 関数単位</strong>を切り替えられます。最初はまとまりを俯瞰し、興味がある場所だけコードへ進む設計です。</p>
+</details>
+
 **3. 最終回答がどこから来たかを探す**
 
 たとえば「Do you know how to calculate mean?」の説明文は、PyBot純正の <a href="https://github.com/huggingface/pybot/blob/7d63c7fbebb44c7e466e5c8b5c1f341ab767929e/bot/knowledge/maths.py#L5101-L5104">bot/knowledge/maths.py の5101行</a> に、定数 <code>_AVERAGE_EXPLAIN</code> として書かれています。
@@ -42,6 +48,8 @@ Hugging Faceの [PyBot](https://github.com/huggingface/pybot) をそのまま実
 | **全体構造** | どんな領域が存在し、どう関係するか | Python ASTによる静的解析 |
 | **ファイル** | Pythonファイルの分布と所属 | AST + フォルダ構造 |
 | **実行経路** | その質問で、実際にどの関数が呼ばれたか | sys.setprofileによる再実行時の計測 |
+
+これはGNNモデルを学習するアプリではなく、実際のプログラムの<strong>依存グラフと呼び出しグラフを可視化するアプリ</strong>です。
 
 グラフは拡大・縮小・ドラッグ移動・ノード選択に対応。再生・停止・コマ送り・速度変更・時刻バーも使えます。数万〜十数万回の呼び出しは見やすく集約し、総数と抽出数を区別しています。
 
