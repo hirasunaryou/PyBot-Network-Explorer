@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>PyBot Network Explorer — 図でわかる操作ガイド</title>
+<!--EMBED_STYLES-->
+</head>
+<body>
+<header class="cover">
+<div class="container">
+  <div class="cover-top"><strong>PYBOT <em>NETWORK EXPLORER</em></strong><span>STUDY GUIDE · v1</span></div>
+  <div class="cover-grid">
+    <div>
+      <div class="eyebrow">THE ANATOMY OF RULE-BASED AI</div>
+      <h1>64万行のルールを、<br><em>見える地図に。</em></h1>
+      <p>会話の裏で何が呼ばれ、どこから回答が来たのか。グラフを動かして、コードを開いて、考察する。</p>
+      <div class="cover-chips"><span>Python標準のみ</span><span>venv不要</span><span>GPU不要</span><span>外部LLM API不要</span></div>
+      <a class="primary-link" href="#start">まず動かす <span>↘</span></a>
+    </div>
+    <div class="hero-diagram" aria-label="静的な依存グラフと動的呼出グラフを重ねずに比較する概念図">
+      <div class="diagram-head">PYBOT RESEARCH MAP <span>● LIVE</span></div>
+      <svg viewBox="0 0 380 273" role="img" aria-label="理解、記憶、知識、回答候補、選択器の関係の概念図">
+        <g stroke="#517c89" stroke-width="2" fill="none">
+          <path d="M58 133 Q115 25 180 81"/><path d="M58 133 Q120 122 181 145"/>
+          <path d="M181 81 Q244 14 315 127"/><path d="M181 145 Q242 210 315 127"/>
+          <path d="M58 133 Q134 235 181 214"/><path d="M181 214 Q244 243 315 127"/>
+        </g>
+        <path d="M58 133 Q133 108 181 145 Q246 194 315 127" stroke="#69dfc5" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <g font-size="11" text-anchor="middle" font-weight="800" fill="#eefcf9">
+          <circle cx="58" cy="133" r="32" fill="#215861" stroke="#60d7be"/><text x="58" y="138">質問</text>
+          <circle cx="181" cy="81" r="30" fill="#655987" stroke="#9c92ca"/><text x="181" y="86">理解</text>
+          <circle cx="181" cy="145" r="31" fill="#285e83" stroke="#77b8e5"/><text x="181" y="150">記憶</text>
+          <circle cx="181" cy="214" r="30" fill="#8c643e" stroke="#deb27b"/><text x="181" y="219">知識</text>
+          <circle cx="315" cy="127" r="35" fill="#874b56" stroke="#e89da4"/><text x="315" y="132">選択</text>
+        </g>
+        <text x="190" y="263" font-size="10" fill="#82c7bb" text-anchor="middle">CONCEPT DIAGRAM / 実行ログとは別の概念図</text>
+      </svg>
+      <div class="diagram-foot"><i></i> コードの構造を見て、実際の実行だけを光らせる</div>
+    </div>
+  </div>
+</div>
+</header>
+<nav class="nav"><div class="container">
+<a href="#start">01 セットアップ</a><a href="#screen">02 画面案内</a><a href="#execute">03 実行グラフ</a><a href="#evidence">04 証拠の見方</a><a href="#workshop">05 勉強会</a><a href="#faq">06 FAQ</a>
+</div></nav>
+<main class="container">
+<section id="start" class="chapter">
+  <div class="section-kicker">01 / SETUP</div><h2>まずは、<em>ダブルクリックだけ。</em></h2>
+  <p class="lead">MacとWindowsを一つのコードで対応します。Python 3.8以上が必要ですが、<strong>仮想環境や追加パッケージは不要</strong>です。初回のみ元PyBotのソースを安全に取得します。</p>
+  <div class="step-grid">
+    <article class="step-card"><span class="step-num">01</span><div class="step-illustration">↓</div><h3>ダウンロード</h3><p><a href="https://github.com/hirasunaryou/PyBot-Network-Explorer" target="_blank" rel="noopener">このリポジトリ</a>で Code → Download ZIP。展開したフォルダを開きます。</p></article>
+    <article class="step-card"><span class="step-num">02</span><div class="step-illustration">▶</div><h3>OSのファイルを実行</h3><p>Macは <code>start_mac.command</code>、Windowsは <code>start_windows.bat</code> をダブルクリック。</p></article>
+    <article class="step-card"><span class="step-num">03</span><div class="step-illustration">◎</div><h3>ブラウザが開く</h3><p>会話・グラフ・ソース表示が一画面で使えます。終了する場合はターミナルを閉じるかCtrl+C。</p></article>
+  </div>
+  <div class="platform-pair">
+    <div><strong>macOS</strong><code>./start_mac.command</code><span>Python.org版で証明書エラーが出る場合は、OSの信頼済み証明書で安全に再試行します。SSL検証は無効化しません。</span></div>
+    <div><strong>Windows</strong><code>start_windows.bat</code><span>Pythonランチャー（py）を優先します。社内ネットワークでは初回取得制限に注意してください。</span></div>
+  </div>
+</section>
+<section id="screen" class="chapter">
+  <div class="section-kicker">02 / SCREEN TOUR</div><h2>まず眺めるのは、<em>この画面。</em></h2>
+  <p class="lead">左で質問、中央のネットワークで内部を観察、右で実コードを確認。メニューや説明を覚えるより、まず実験します。</p>
+  <figure class="screen"><div class="screen-top"><span>● ACTUAL APPLICATION SCREEN</span><span>SHOT WITH ORIGINAL PYBOT</span></div><img src="images/overview.png" alt="PyBot Network Explorerの実画面。左に質問、中央にノードグラフ、右にソースインスペクタ。" width="1450"><figcaption>実PyBotを起動して撮影したスクリーンショット。ノードとリンクは静的解析による全体構造です。</figcaption></figure>
+  <div class="three-up">
+    <div><b>LEFT / QUESTION</b><h3>会話を試す</h3><p>例題を選ぶか英語で入力。PyBot純正の返信と複数の回答候補を表示。</p></div>
+    <div><b>CENTER / GRAPH</b><h3>内部の地図を見る</h3><p>全体構造・ファイル・実行経路を切替。ノードを拡大して辿れます。</p></div>
+    <div><b>RIGHT / SOURCE</b><h3>元コードへ移動</h3><p>クリックで元のPythonソースを読み、行番号と回答定義を確認できます。</p></div>
+  </div>
+</section>
+<section id="execute" class="chapter">
+  <div class="section-kicker">03 / LIVE EXECUTION</div><h2>グラフが光るのは、<em>実際に通った場所。</em></h2>
+  <p class="lead">「平均値の説明」を押して質問 → 「この回答のネットワークを見る」。再実行で観測した関数呼び出しをグラフに重ねます。</p>
+  <figure class="screen"><div class="screen-top"><span>● REAL REPLAY TRACE</span><span>SELECTABLE NODES / REPLAY</span></div><img src="images/trace.png" alt="平均値に関する質問を実際のPyBotで処理し、関数呼び出しネットワークを可視化している画面。" width="1450"><figcaption>実際のPyBotによる実行グラフ。表示は集約・抜粋したノードとエッジで、全ての関数呼び出しではありません。</figcaption></figure>
+  <div class="journey">
+    <div><span>1</span><b>質問を送る</b><small>本物のPyBotが回答</small></div><i>→</i>
+    <div><span>2</span><b>経路を可視化</b><small>別メモリで再実行</small></div><i>→</i>
+    <div><span>3</span><b>時間バーを動かす</b><small>ノードをハイライト</small></div><i>→</i>
+    <div><span>4</span><b>コードを開く</b><small>元の実装を調べる</small></div>
+  </div>
+  <div class="example"><div class="example-label">CONCRETE EXAMPLE / MEAN</div><h3>この回答文は、どこから来た？</h3><p>「Do you know how to calculate mean?」では、PyBotの <code>answers</code> モジュールが候補を出し、平均値の説明文そのものが <code>bot/knowledge/maths.py</code> に <code>_AVERAGE_EXPLAIN</code> として定義されています。</p><div class="origin-path"><span>PyBotの回答</span><i>→</i><span>選ばれた候補 answers</span><i>→</i><span>文字列定義 <b>maths.py:5101</b></span></div><p><a href="https://github.com/huggingface/pybot/blob/7d63c7fbebb44c7e466e5c8b5c1f341ab767929e/bot/knowledge/maths.py#L5101-L5104" target="_blank" rel="noopener">固定版のオリジナルコードを直接確認 ↗</a></p></div>
+</section>
+<section id="evidence" class="chapter">
+  <div class="section-kicker">04 / EVIDENCE TYPES</div><h2>どの線が、<em>何を証明する？</em></h2>
+  <p class="lead">見た目が似ていても、実際に通過した呼び出しと「コード上つながり得る」ことは違います。この区別が実験の信頼性を支えます。</p>
+  <div class="evidence-grid">
+    <article><div class="evidence-line static"></div><h3>静的依存</h3><p>PythonのASTから抽出したimport・ファイル所属関係。コード構造の地図であり、今回実行した証拠ではありません。</p></article>
+    <article><div class="evidence-line dynamic"></div><h3>動的な呼び出し</h3><p><code>sys.setprofile</code> で別メモリの再実行中に観測。線の太さは呼び出し回数の参考値です。</p></article>
+    <article><div class="evidence-line origin"></div><h3>回答文の静的定義</h3><p>元の英語回答と完全一致する文字列定数を検索します。回答の出所の候補であり、通過行だと断定しません。</p></article>
+  </div>
+  <div class="warning"><strong>重要：再実行は元のターンと別です。</strong><p>観測した関数の線は、同じ質問と会話履歴を別のメモリで再生したもの。採択モジュールまたは回答が異なる場合は画面に警告を表示します。また、関数を呼んだことは、その関数が「答えを決めた」証明ではありません。</p></div>
+</section>
+<section id="workshop" class="chapter">
+  <div class="section-kicker">05 / FACILITATION</div><h2>45分の勉強会なら、<em>こう使う。</em></h2>
+  <div class="timeline">
+    <div><time>00–10分</time><h3>全体地図で構造を知る</h3><p>質問前に「全体構造」。runtime・memory・knowledge・compose・modules・arbiterがどう分かれているかを確認。</p></div>
+    <div><time>10–20分</time><h3>会場から質問する</h3><p>平均値・記憶・日常知識。PyBot純正の候補を観察して、次に通る経路を予想。</p></div>
+    <div><time>20–35分</time><h3>動的経路とコードを辿る</h3><p>再生バーで実行ノードを光らせ、知識辞書・回答候補のモジュール・回答定義を見て議論。</p></div>
+    <div><time>35–45分</time><h3>ルールとLLMの違い</h3><p>「知識をどこに保持するか」「未知入力にどう対応するか」「計算量と説明可能性」を比較。</p></div>
+  </div>
+  <div class="levels"><article><b>BEGINNER</b><h3>初級者の見どころ</h3><p>「大きな脳が文章を書いている」ように見えても、実際には多くのルール群が候補を作り、選択器が決めています。</p></article><article><b>ADVANCED</b><h3>上級者の見どころ</h3><p>静的依存と動的call graph、優先度と選択器の役割、再実行の一致率、実行回数と回答への因果寄与の違いを検討します。</p></article></div>
+</section>
+<section id="faq" class="chapter">
+  <div class="section-kicker">06 / TROUBLESHOOTING</div><h2>困ったときの確認。</h2>
+  <details><summary>なぜ仮想環境なしで動くの？</summary><p>元のPyBotと、このNetwork ExplorerのPythonバックエンドは追加pipライブラリを使わず、標準ライブラリのみで動く構成です。画面はブラウザ内蔵SVGとJavaScriptで描画しています。GPU・学習済みのモデル重みは使いません。</p></details>
+  <details><summary>初回のダウンロードに失敗した</summary><p>インターネット接続が必要です。Python.org版のMacでSSL証明書エラーが出た場合は、OS標準のcurlで証明書検証を維持したまま再試行します。失敗が続くときは、Finder → アプリケーション → Pythonのバージョンのフォルダ → Install Certificates.command を実行して確認してください。</p></details>
+  <details><summary>グラフのノードや線の数が実行回数と一致しない</summary><p>何万回もの実行を全部描くと読めなくなります。画面は主要なノード・エッジと時系列の代表点を抽出しています。全体の関数呼び出し件数や省略数はAPIに記録されています。意味的な寄与のランキングではありません。</p></details>
+  <details><summary>グラフの真ん中の線が一部途切れている</summary><p>選んだ表示数に含まれないノードの接続は省略します。表示ノード数のスライダーを増やしてみてください。ノードの所属から処理の大まかな役割を解説しており、未観測のエッジを補完することはありません。</p></details>
+  <details><summary>PyBotを改変しているの？</summary><p>いいえ。Hugging FaceのPyBotは固定コミットで取得し、そのまま実行します。Graph Explorerは観測・グラフ描画のための独立コードです。元PyBotはApache License 2.0です。</p></details>
+</section>
+</main>
+<footer><div class="container"><div><strong>PYBOT NETWORK EXPLORER</strong><p>知る → 試す → 辿る → 原典に戻る。</p></div><div><p>Hugging Face PyBotの独立した学習ツールです。</p><a href="https://github.com/huggingface/pybot" target="_blank" rel="noopener">オリジナルPyBotを見る ↗</a></div></div></footer>
+</body>
+</html>
