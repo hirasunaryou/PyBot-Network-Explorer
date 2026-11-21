@@ -110,6 +110,12 @@ class ExplorerTests(unittest.TestCase):
         self.assertGreaterEqual(r["total"]["files"],7)
         self.assertTrue(all(e["type"]=="static_import" for e in r["groups"]["edges"]))
         self.assertTrue(all(e["type"] in ("static_import","member") for e in r["files"]["edges"]))
+        self.assertTrue(any(
+            e["source"]=="file:bot/runtime.py" and
+            e["target"]=="file:bot/modules/greeting.py" and
+            e["type"]=="static_import"
+            for e in r["files"]["edges"]
+        ), "File import arrows should come from real AST import statements")
         self.assertTrue(any(n["name"]=="modules" for n in r["groups"]["nodes"]))
         self.assertEqual(group_for("bot/modules/arbiter.py"),"arbiter")
         self.assertEqual(group_for("bot/knowledge/maths.py"),"knowledge")
