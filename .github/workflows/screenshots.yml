@@ -1,0 +1,58 @@
+name: Live UI screenshots + portable HTML manual
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'network/**'
+      - 'tools/capture.py'
+      - 'tools/build_manual.py'
+      - 'docs/MANUAL.source.html'
+      - 'docs/manual.css'
+      - '.github/workflows/screenshots.yml'
+permissions:
+  contents: write
+concurrency:
+  group: pybot-network-explorer-screenshots
+  cancel-in-progress: true
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Ensure Japanese glyphs are available
+        run: |
+          sudo timeout 50 apt-get update -qq || echo 'Using runner package metadata'
+          sudo timeout 100 env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends fonts-ipafont-gothic
+          fc-cache -f
+          fc-match -f '%{family}\n' 'IPAGothic:lang=ja'
+      - name: Install browser for CI only, not for the app
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install chromium
+      - name: Run the real PyBot graph and capture screenshots
+        run: python tools/capture.py
+      - name: Bundle CSS and actual images into the standalone HTML manual
+        run: |
+          python tools/build_manual.py
+          python tools/build_manual.py --check
+      - name: Verify the HTML manual opens locally with real images
+        run: python tools/check_manual.py
+      - name: Commit regenerated screenshots and manual
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/MANUAL.html docs/images/overview.png docs/images/files.png docs/images/trace.png docs/images/light.png
+          if git diff --cached --quiet; then
+            echo 'No screenshot changes'
+          else
+            git commit -m 'docs: refresh real PyBot network screenshots and standalone guide [skip ci]'
+            git fetch origin main
+            git rebase -X theirs origin/main
+            git push origin HEAD:main
+          fi
