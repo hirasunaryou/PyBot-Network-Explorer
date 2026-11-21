@@ -335,12 +335,65 @@ def static_system(source):
     prioritized = [f for f in per_file if f["file"] in forced]
     seen = {f["id"] for f in prioritized}
     file_nodes = (prioritized + [f for f in ranked if f["id"] not in seen])[:85]
-    # File->group is a membership relationship, not a function call.
+    # Real file-to-file Python import edges: unlike mere group membership,
+    # these are AST-supported dependencies. They do NOT claim a runtime call.
+    chosen_paths={f["file"] for f in file_nodes}
+    file_imports=Counter()
+
+    def existing_module(parts):
+        if not parts or parts[0]!="bot":
+            return None
+        path="/".join(parts)
+        for candidate in (path+".py",path+"/__init__.py"):
+            if candidate in chosen_paths:
+                return candidate
+        return None
+
+    for record in file_nodes:
+        source_path=record["file"]
+        try:
+            syntax=ast.parse((source/source_path).read_text(encoding="utf-8"))
+        except (SyntaxError,OSError,UnicodeError,RecursionError):
+            continue
+        for item in ast.walk(syntax):
+            targets=set()
+            if isinstance(item,ast.Import):
+                for entry in item.names:
+                    found=existing_module(entry.name.split("."))
+                    if found:
+                        targets.add(found)
+            elif isinstance(item,ast.ImportFrom):
+                package=source_path[:-3].split("/")[:-1]
+                if item.level:
+                    for _ in range(item.level-1):
+                        if len(package)>1:
+                            package.pop()
+                    module_path=package+((item.module or "").split(".") if item.module else [])
+                else:
+                    module_path=(item.module or "").split(".")
+                resolved=existing_module(module_path)
+                if resolved:
+                    targets.add(resolved)
+                for entry in item.names:
+                    if entry.name=="*":
+                        continue
+                    child=existing_module(module_path+entry.name.split("."))
+                    if child:
+                        targets.add(child)
+            for target in targets:
+                if target!=source_path:
+                    file_imports[(source_path,target)]+=1
+    import_edges=[{"source":"file:"+source_path,"target":"file:"+target,
+                   "calls":count,"type":"static_import"}
+                  for (source_path,target),count in file_imports.most_common()]
+
+    # Group membership is represented separately, never as an import.
     membership = [{"source":"group:"+f["group"],"target":f["id"],
                    "calls":f["lines"],"type":"member"} for f in file_nodes]
     return {
         "groups":{"nodes":cluster_nodes,"edges":group_edges},
-        "files":{"nodes":cluster_nodes+file_nodes,"edges":group_edges+membership},
+        "files":{"nodes":cluster_nodes+file_nodes,
+                 "edges":group_edges+membership+import_edges},
         "total":{"files":sum(x["files"] for x in groups.values()),
                  "lines":sum(x["lines"] for x in groups.values()),
                  "functions":sum(x["functions"] for x in groups.values())},
