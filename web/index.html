@@ -88,6 +88,7 @@
   <div class="graph-toolbar">
     <div class="graph-source-label" id="graphSource"><span class="evidence-key static"></span> 静的コード解析・実行ではありません</div>
     <div class="graph-tools">
+      <label id="traceLevelWrap" class="trace-level-control hidden" for="traceLevel">粒度 <select id="traceLevel"><option value="files">ファイル単位</option><option value="functions">関数単位</option></select></label>
       <label for="density">表示ノード <output id="densityLabel">45</output></label>
       <input id="density" type="range" min="20" max="120" step="5" value="45" aria-label="表示するノード数">
       <button id="zoomIn" title="拡大" aria-label="グラフを拡大">＋</button>
