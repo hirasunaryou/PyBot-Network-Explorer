@@ -75,8 +75,14 @@ def main():
             page.locator("#goLast").click()
             assert int(page.locator("#timeline").input_value())==maximum
             page.locator("#goFirst").click()
+            assert page.locator("#traceLevel").input_value()=="files"
             page.screenshot(path=str(assets/"trace.png"),full_page=True)
-            print("Dynamic trace: play/pause, scrub, first/last, provenance and screenshot passed")
+            page.locator("#traceLevel").select_option("functions")
+            assert page.locator("#traceLevel").input_value()=="functions"
+            assert page.locator(".graph-node").count()>12
+            page.screenshot(path=str(assets/"functions.png"),full_page=True)
+            page.locator("#traceLevel").select_option("files")
+            print("Dynamic graph: observed file/function levels, playback, source and screenshots passed")
 
             page.locator("#themeButton").click()
             assert page.locator("html").get_attribute("data-theme")=="light"
