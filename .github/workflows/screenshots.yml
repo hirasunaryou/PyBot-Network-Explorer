@@ -48,7 +48,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/MANUAL.html docs/images/overview.png docs/images/files.png docs/images/trace.png docs/images/light.png docs/images/manual-preview.png
+          git add docs/MANUAL.html docs/images/overview.png docs/images/files.png docs/images/trace.png docs/images/functions.png docs/images/light.png docs/images/manual-preview.png
           if git diff --cached --quiet; then
             echo 'No screenshot changes'
           else
