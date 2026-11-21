@@ -20,8 +20,8 @@ def main():
         for picture in screenshots.all():
             assert picture.evaluate("(el)=>el.complete&&el.naturalWidth>200")
         assert page.locator(".cover h1").count()==1
-        background=page.locator(".cover").evaluate("(el)=>getComputedStyle(el).backgroundColor")
-        assert background!="rgba(0, 0, 0, 0)"
+        background=page.locator(".cover").evaluate("(el)=>getComputedStyle(el).backgroundImage")
+        assert background!="none", "Hero gradient was not loaded"
         page.screenshot(path=str(ROOT/"docs"/"images"/"manual-preview.png"),full_page=False)
         print("PASS: standalone manual, embedded CSS, 2 real screenshots, local rendering")
         browser.close()
