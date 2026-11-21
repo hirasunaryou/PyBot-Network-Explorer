@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#091724">
+<title>PyBot Network Explorer — ルールでできた知能の地図</title>
+<link rel="stylesheet" href="/web/style.css">
+<script src="/web/app.js" defer></script>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <a class="brand" href="/" aria-label="PyBot Network Explorer">
+    <span class="brand-mark">P<span class="brand-orbit">✳</span></span>
+    <span><strong>PYBOT <b>NETWORK EXPLORER</b></strong><small>THE ANATOMY OF RULE-BASED AI</small></span>
+  </a>
+  <div class="top-actions">
+    <span class="system-indicator" id="statusIndicator"><i></i>接続中</span>
+    <a class="top-link" href="/docs/MANUAL.html" target="_blank" rel="noopener">図解ガイド ↗</a>
+    <a class="top-link" href="https://github.com/huggingface/pybot" target="_blank" rel="noopener">PyBot原典 ↗</a>
+    <div class="font-tools" role="group" aria-label="文字の拡大・縮小">
+      <button id="fontDown" title="文字を小さく" aria-label="文字を小さく">A−</button>
+      <span id="fontPercent">100%</span>
+      <button id="fontUp" title="文字を大きく" aria-label="文字を大きく">A＋</button>
+    </div>
+    <button id="themeButton" class="mode-button" title="表示テーマを切り替え">☀ ライトへ</button>
+  </div>
+</header>
+
+<div class="intro">
+  <div class="intro-left">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> STRUCTURE / EXECUTION / ANSWER ORIGIN</div>
+    <h1>64万行のルールを、<em>ひとつの地図に。</em></h1>
+    <p><a href="https://github.com/huggingface/pybot" target="_blank" rel="noopener">Hugging FaceのPyBot</a>を変更せず、コードのつながり・会話中の実行経路・回答の出典を探る独立した学習アプリ。<strong>Python標準ライブラリのみ。venv・GPU・pip不要。</strong></p>
+  </div>
+  <div class="intro-metrics">
+    <div><b id="sourceLines">—</b><small>PYTHON LINES</small></div>
+    <div><b id="sourceFiles">—</b><small>SOURCE FILES</small></div>
+    <div><b>0</b><small>PYBOT MODEL WEIGHTS</small></div>
+  </div>
+</div>
+
+<main class="studio">
+<aside class="panel experiment-panel">
+  <div class="panel-title">
+    <div><span class="overline">01 / LIVE QUESTION</span><h2>質問してみる</h2></div>
+    <button id="clearChat" class="subtle-button" title="会話をリセットする">↺ リセット</button>
+  </div>
+  <div class="quick-scenes">
+    <div class="scene-caption">SUGGESTED EXPERIMENTS</div>
+    <div class="scene-list">
+      <button data-example="Do you know how to calculate mean?">平均値の説明</button>
+      <button data-example="Hi, I'm Sam.">名前を教える</button>
+      <button data-example="What's my name?">記憶を試す</button>
+      <button data-example="Explain quantum banana regression.">未知の概念</button>
+      <button data-example="How should I boil an egg?">日常知識</button>
+    </div>
+  </div>
+  <div id="chat" class="chat" aria-live="polite">
+    <div class="chat-empty"><div class="chat-empty-art">◎</div><strong>ここから実験を始める</strong><p>最初は「平均値の説明」がおすすめ。PyBotが返した答えが、どのコードに書かれているか探せます。</p></div>
+  </div>
+  <div class="question-box">
+    <label for="questionInput">YOUR QUESTION <span>英語を推奨・自由入力可</span></label>
+    <textarea id="questionInput" placeholder="Ask PyBot anything…" rows="2" maxlength="1000"></textarea>
+    <div class="question-controls">
+      <span id="inputHint">Enterで送信・Shift+Enterで改行</span>
+      <button id="sendQuestion" class="primary-button">送信 ↗</button>
+    </div>
+    <p class="privacy-small">質問・回答はローカルのPyBotで処理。外部LLM APIには送信しません。</p>
+  </div>
+  <div class="candidate-section">
+    <div class="candidate-head"><b>回答候補</b><span id="candidateMeta">—</span></div>
+    <div id="candidates" class="candidates"><span class="muted">質問すると、採択・非採択候補を表示します。</span></div>
+    <button id="visualize" class="wide-button" disabled><span>✦ この回答のネットワークを見る</span><span>↗</span></button>
+  </div>
+</aside>
+
+<section class="panel map-panel" id="mapPanel">
+  <div class="map-heading">
+    <div><span class="overline">02 / THE INSIDE STORY</span><h2>PyBotのネットワーク</h2></div>
+    <div class="map-switch" role="tablist" aria-label="ネットワークの観察方法">
+      <button data-mode="system" class="active" aria-selected="true">全体構造</button>
+      <button data-mode="files" aria-selected="false">ファイル</button>
+      <button data-mode="trace" aria-selected="false">実行経路</button>
+    </div>
+  </div>
+  <div class="graph-toolbar">
+    <div class="graph-source-label" id="graphSource"><span class="evidence-key static"></span> 静的コード解析・実行ではありません</div>
+    <div class="graph-tools">
+      <label for="density">表示ノード <output id="densityLabel">45</output></label>
+      <input id="density" type="range" min="20" max="120" step="5" value="45" aria-label="表示するノード数">
+      <button id="zoomIn" title="拡大" aria-label="グラフを拡大">＋</button>
+      <button id="zoomOut" title="縮小" aria-label="グラフを縮小">−</button>
+      <button id="zoomReset" title="グラフ全体に戻す">全体</button>
+      <button id="graphExpand" title="グラフを拡大表示">⤢</button>
+    </div>
+  </div>
+  <div class="graph-container" id="graphContainer">
+    <div class="graph-legend"><span><i class="edge-static"></i>静的依存</span><span><i class="edge-dynamic"></i>実行呼び出し</span><span><i class="edge-current"></i>再生位置</span></div>
+    <svg id="network" viewBox="0 0 1140 640" role="img" aria-label="PyBotコードの静的構造または実行時関数ネットワーク。ノードをクリックすると元のPythonコードを表示">
+      <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="currentColor"/></marker></defs>
+      <rect id="graphBackground" width="1140" height="640" fill="transparent"/>
+      <g id="graphScene"><g id="edges"></g><g id="nodes"></g></g>
+    </svg>
+    <div id="graphEmpty" class="graph-empty hidden">この条件では表示対象がありません。表示ノード数を増やすか、別のビューを選んでください。</div>
+    <div class="graph-hint">ドラッグで移動・ホイールで拡大・ノードをクリックしてコードへ</div>
+  </div>
+  <div class="playback" id="playback">
+    <div class="playback-label">
+      <span><b id="playbackTitle">STATIC SYSTEM MAP</b><small id="playbackSubtitle">全体を俯瞰 → 質問 → 実行経路</small></span>
+      <span id="playbackCount">—</span>
+    </div>
+    <input id="timeline" type="range" min="0" max="1" value="0" step="1" aria-label="実行経路を時間方向に移動" disabled>
+    <div class="playback-controls">
+      <button id="goFirst" disabled title="最初へ">|◀</button>
+      <button id="goBack" disabled title="前の経路へ">◀</button>
+      <button id="play" class="play-button" disabled>▶ 再生</button>
+      <button id="goNext" disabled title="次の経路へ">▶</button>
+      <button id="goLast" disabled title="最後へ">▶|</button>
+      <button id="speed" disabled>×1</button>
+      <span id="frameLabel">質問すると再生できます</span>
+    </div>
+    <p class="time-caution">実行経路は別メモリで再実行した関数呼び出しの代表点です。全行の再生ではありません。</p>
+  </div>
+  <div id="statusLine" class="status-line">PyBotの構造を読み込んでいます…</div>
+</section>
+
+<aside class="panel insight-panel">
+  <div class="panel-title">
+    <div><span class="overline">03 / UNDER THE HOOD</span><h2>いま見ているもの</h2></div>
+    <span class="insight-badge" id="evidenceBadge">STATIC</span>
+  </div>
+  <div class="inspector">
+    <div class="selection-head"><span class="tiny-label">SELECTED NODE / STAGE</span><h3 id="selectedTitle">グラフ上の点を選択</h3><p id="selectedExplain">コードの領域や実際の関数を選ぶと、内容・実行回数・ソースが表示されます。</p></div>
+    <div id="nodeFacts" class="node-facts"></div>
+    <div class="source-head"><span class="tiny-label">ORIGINAL PYBOT SOURCE</span><a id="sourceLink" href="https://github.com/huggingface/pybot" target="_blank" rel="noopener">原文を開く ↗</a></div>
+    <div class="source-path" id="sourcePath">bot/…</div>
+    <div class="source-code" id="sourceCode"><div class="code-placeholder">ノードをクリックすると、元のPythonコードと該当行を表示します。</div></div>
+  </div>
+  <div class="provenance" id="provenance">
+    <div class="candidate-head"><b>最終回答の出典</b><span id="provenanceLabel">SOURCE EVIDENCE</span></div>
+    <div id="answerOrigin" class="origin-empty">質問後に実行グラフを生成すると、PyBotの回答文に完全一致するソース定義があれば表示します。</div>
+  </div>
+  <div class="evidence-note">
+    <strong>証拠の種類を区別</strong>
+    <p><b>実線：</b>再実行で観測した呼び出し。<b>点線：</b>静的import。<b>回答定義：</b>文字列の完全一致によるソース照合。関数の分類は所属フォルダに基づく案内です。</p>
+  </div>
+</aside>
+</main>
+<footer class="footer"><span>PyBot Network Explorer · Independent study tool · Standard library only</span><span>Original: <a href="https://github.com/huggingface/pybot" target="_blank" rel="noopener">Hugging Face / PyBot</a> · Apache-2.0 · Source pinned</span></footer>
+<div role="status" aria-live="polite" id="toast" class="toast hidden"></div>
+</div>
+</body>
+</html>
