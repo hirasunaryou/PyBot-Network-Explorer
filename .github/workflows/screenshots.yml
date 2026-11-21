@@ -7,6 +7,7 @@ on:
       - 'web/**'
       - 'network/**'
       - 'tools/capture.py'
+      - 'tools/check_manual.py'
       - 'tools/build_manual.py'
       - 'docs/MANUAL.source.html'
       - 'docs/manual.css'
